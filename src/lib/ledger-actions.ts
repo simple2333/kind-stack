@@ -4,6 +4,7 @@ const ACTION_LABEL: Record<string, string> = {
   "item.received": "物品入库",
   "item.priced": "定价",
   "item.shelved": "上架",
+  "item.unshelved": "下架（待上架）",
   "item.on_shelf": "上架",
   "item.sold": "售出",
   "item.given": "转赠",

@@ -21,6 +21,7 @@ export type LedgerAction =
   | "item.received"
   | "item.priced"
   | "item.shelved"
+  | "item.unshelved"
   | "item.sold"
   | "item.given"
   | "item.kept"

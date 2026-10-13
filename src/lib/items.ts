@@ -120,9 +120,35 @@ export async function createItems(
   return created;
 }
 
+/** 纯状态流转（只切换 status、不消耗出库数量）：入库 / 上架 */
+export const TRANSITION_STATUSES: ItemStatus[] = ["received", "on_shelf"];
+
 export async function updateStatus(code: string, status: ItemStatus, qty?: number): Promise<Item> {
   const itemRow = await getByCode(code);
   if (!itemRow) throw new Error(`物品不存在: ${code}`);
+
+  // received / on_shelf 是纯状态流转：不涉及出库数量，也不校验剩余量。
+  // 修复：此前这类状态会落入下面的出库分支，outQty[status] 为 undefined → NaN，
+  // 导致「上架 / 在售」永远设不上（首页「正在爱心义卖」恒为 0）。
+  if (status === "received" || status === "on_shelf") {
+    if (itemRow.status === status) return itemRow;
+    await db
+      .update(item)
+      .set({ status, updatedAt: new Date().toISOString() })
+      .where(eq(item.id, itemRow.id));
+    await appendLedger(
+      "item",
+      itemRow.id,
+      status === "on_shelf" ? "item.shelved" : "item.unshelved",
+      {
+        code: itemRow.code,
+        name: itemRow.name,
+        price: itemRow.price,
+        remaining: remainingQty(itemRow),
+      }
+    );
+    return (await getById(itemRow.id))!;
+  }
 
   const remaining = remainingQty(itemRow);
   const n = qty == null ? remaining : Math.min(Math.max(1, Math.floor(qty)), remaining);

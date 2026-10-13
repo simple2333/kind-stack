@@ -214,17 +214,6 @@ async function main() {
   console.log(`✓ 捐赠批次 ${BATCH.batchCode}（${batchItems.length} 件）`);
 
   // ---------- 6. 上架（在售） ----------
-  // 说明：updateStatus 对 on_shelf 会算出 NaN（已知 bug），这里直接落库 + 记账本。
-  async function markOnShelf(code: string) {
-    const it = await getByCode(code);
-    if (!it || it.status !== "received") return;
-    await db
-      .update(schema.item)
-      .set({ status: "on_shelf", updatedAt: new Date().toISOString() })
-      .where(eq(schema.item.id, it.id));
-    await appendLedger("item", it.id, "item.on_shelf", { code: it.code, name: it.name, price: it.price });
-  }
-
   const onShelfCodes: string[] = [];
   for (const it of ITEMS) {
     if (RECEIVED_ONLY.has(it.name)) continue;
@@ -233,7 +222,10 @@ async function main() {
     if (code) onShelfCodes.push(code);
   }
   for (const b of batchItems) onShelfCodes.push(b.code);
-  for (const code of onShelfCodes) await markOnShelf(code);
+  for (const code of onShelfCodes) {
+    const it = await getByCode(code);
+    if (it && it.status === "received") await updateStatus(code, "on_shelf");
+  }
   console.log(`✓ 上架 ${onShelfCodes.length} 件`);
 
   // ---------- 7. 流转出库 ----------
