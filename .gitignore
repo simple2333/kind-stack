@@ -1,0 +1,62 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+!.env.example
+.env.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# 益栈运行数据（SQLite + 备份）
+/data
+# 演示库（截图/演示用，不提交）
+/data-demo
+
+# 构建与大文件产物
+*.tgz
+/public/*.apk
+
+# 第三方打印控件与标签模板（不随仓库分发，需自行获取）
+/public/gridpp/
+/public/grf/
+
+# uni-app 移动端工程（未开源）
+/pda/
+
+# IDE
+/.idea
